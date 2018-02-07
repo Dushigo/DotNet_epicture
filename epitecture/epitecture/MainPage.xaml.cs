@@ -1,40 +1,72 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Media.Imaging;
-using Windows.UI.Xaml.Navigation;
-
+using Imgur.API.Authentication.Impl;
+using Imgur.API.Endpoints.Impl;
+using Imgur.API.Models;
+using System.IO;
+using System.Threading.Tasks;
+using Imgur.API;
+using System.Diagnostics;
 
 namespace epitecture
 {
     public sealed partial class MainPage : Page
     {
-        public void AddImage(object sender, RoutedEventArgs e)
+        public async void AddImage(object sender, RoutedEventArgs e)
         {
-            Image tmp = new Image();
-            tmp.Source = new BitmapImage(new Uri("https://www.w3schools.com/w3css/img_fjords.jpg", UriKind.Absolute));
-            ImageList.Items.Add(tmp);
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation =
+                Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+            picker.FileTypeFilter.Add(".png");
+            picker.FileTypeFilter.Add(".gif");
+            picker.FileTypeFilter.Add(".svg");
+            picker.FileTypeFilter.Add(".bmp");
+
+            Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                imgurFct.UploadImage(file.Path);
+                //ImageList.Items.Add(new ImageClass { ImageSource = file.Path, Title = file.Path, IsFav = false});
+            }
+        }
+
+        public void Search(object sender, RoutedEventArgs e)
+        {
+            imgurFct.Search();
+        }
+
+        public async void LoadImage(object sender, RoutedEventArgs e)
+        {
+            var image = await imgurFct.LoadImage();
+            ImageList.Items.Add(new ImageClass { ImageSource = image.Link, Title = image.Title, IsFav = (bool)image.Favorite});
+        }
+
+        public void SortByType(object sender, RoutedEventArgs e)
+        {
+            imgurFct.SortByType();
+        }
+
+        public void SortBySize(object sender, RoutedEventArgs e)
+        {
+            imgurFct.SortBySize();
+        }
+
+        public void FavOrUnfav(object sender, ItemClickEventArgs e)
+        {
+            imgurFct.FavOrUnfav();
         }
 
         public MainPage()
         {
+            imgurFct = new ImgurFct();
             this.InitializeComponent();
+            LoadImage(new object(), new RoutedEventArgs());
         }
 
-        private void AppBarButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+        private ImgurFct imgurFct;
     }
 }

@@ -8,22 +8,40 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <GridView Name="ImageList" IsItemClickEnabled="True">
-            <Image Width="auto">
-                <Image.Source>
-                    <BitmapImage UriSource=""/>
-                </Image.Source>
-            </Image>
+        <GridView Name="ImageList" IsItemClickEnabled="True" ItemClick="FavOrUnfav" Margin="0,37,0,0">
+            <GridView.ItemTemplate>
+                <DataTemplate x:DataType="local:ImageClass">
+                    <StackPanel>
+                        <Image Source="{Binding ImageSource}">
+                        </Image>
+                        <TextBlock HorizontalAlignment="Center" Text="{Binding Title}"></TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+            </GridView.ItemTemplate>
         </GridView>
-        <CommandBar VerticalAlignment="Bottom">
+
+        <StackPanel Name="SearchBox" Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Center">
+            <Rectangle Fill="#FF008299" HorizontalAlignment="Left" Height="37" VerticalAlignment="Top" Width="630"/>
+            <TextBox Width="200" PlaceholderText="Search" HorizontalAlignment="Center"/>
+            <Button Background="#FF008299" Height="37" Width="41" Click="Search" HorizontalAlignment="Center">
+                <Image Source="Assets/search-icon.png"/>
+            </Button>
+            <Rectangle Fill="#FF008299" HorizontalAlignment="Left" Height="37" VerticalAlignment="Top" Width="635"/>
+        </StackPanel>
+        <CommandBar VerticalAlignment="Bottom" Background="#FF008299" Foreground="White">
             <AppBarSeparator/>
-            <AppBarButton Icon="Find" Label="Search"/>
-            <AppBarButton Icon="Upload" Label="Upload" Click="AddImage"/>
-            <AppBarButton Icon="Filter" Label="Filter"/>
+            <AppBarButton Icon="Upload" Label="Upload" Click="AddImage" Foreground="White"/>
+            <AppBarButton Icon="Filter" Label="Filter" Foreground="White">
+                <AppBarButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Type" Click="SortByType"/>
+                        <MenuFlyoutItem Text="Size" Click="SortBySize"/>
+                    </MenuFlyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
             <CommandBar.Content>
                 <TextBlock Text="Actions" Margin="12,14"/>
             </CommandBar.Content>
         </CommandBar>
-
     </Grid>
 </Page>
