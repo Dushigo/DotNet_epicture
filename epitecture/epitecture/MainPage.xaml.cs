@@ -28,31 +28,59 @@ namespace epitecture
 
             Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
             if (file != null)
-            {
-                imgurFct.UploadImage(file.Path);
-                //ImageList.Items.Add(new ImageClass { ImageSource = file.Path, Title = file.Path, IsFav = false});
-            }
+                await imgurFct.UploadImage(file);
         }
-
-        public void Search(object sender, RoutedEventArgs e)
+        public async void Search(object sender, RoutedEventArgs e)
         {
-            imgurFct.Search();
+            ImageList.Items.Clear();
+            var imageList = await imgurFct.Search(TextSearch.Text);
+            prevSearch = TextSearch.Text;
+            foreach (var element in imageList)
+            {
+                var image = await imgurFct.LoadImage(element);
+                ImageList.Items.Add(
+                    new ImageClass
+                    {
+                        ImageSource = image.Link,
+                        Title = image.Title,
+                        IsFav = (bool)image.Favorite,
+                        Type = image.Type,
+                        Size = image.Size
+                    });
+            }
         }
 
         public async void LoadImage(object sender, RoutedEventArgs e)
         {
-            var image = await imgurFct.LoadImage();
-            ImageList.Items.Add(new ImageClass { ImageSource = image.Link, Title = image.Title, IsFav = (bool)image.Favorite});
+            ImageList.Items.Clear();
+            var imageList = await imgurFct.Search("");
+            foreach (var element in imageList)
+            {
+                var image = await imgurFct.LoadImage(element);
+                ImageList.Items.Add(
+                    new ImageClass
+                    {
+                        ImageSource = image.Link,
+                        Title = image.Title,
+                        IsFav = (bool)image.Favorite,
+                        Type = image.Type,
+                        Size = image.Size
+                    });
+            }
         }
 
         public void SortByType(object sender, RoutedEventArgs e)
         {
-            imgurFct.SortByType();
+            //To sort : ImageList
+            //Type In GridView TexBlock Name = Type
+            //imgurFct.SortByType();
         }
 
         public void SortBySize(object sender, RoutedEventArgs e)
         {
-            imgurFct.SortBySize();
+            //To sort : ImageList
+            //Size In GridView TexBlock Name = Size
+            //imgurFct.SortBySize();
         }
 
         public void FavOrUnfav(object sender, ItemClickEventArgs e)
@@ -64,9 +92,11 @@ namespace epitecture
         {
             imgurFct = new ImgurFct();
             this.InitializeComponent();
+            prevSearch = "";
             LoadImage(new object(), new RoutedEventArgs());
         }
 
         private ImgurFct imgurFct;
+        private string prevSearch;
     }
 }

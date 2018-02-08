@@ -15,6 +15,8 @@
                         <Image Source="{Binding ImageSource}">
                         </Image>
                         <TextBlock HorizontalAlignment="Center" Text="{Binding Title}"></TextBlock>
+                        <TextBlock Name="Type" HorizontalAlignment="Center" Text="{Binding Type}" Visibility="Collapsed"></TextBlock>
+                        <TextBlock Name="Size"  HorizontalAlignment="Center" Text="{Binding Size}" Visibility="Collapsed"></TextBlock>
                     </StackPanel>
                 </DataTemplate>
             </GridView.ItemTemplate>
@@ -22,7 +24,7 @@
 
         <StackPanel Name="SearchBox" Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Center">
             <Rectangle Fill="#FF008299" HorizontalAlignment="Left" Height="37" VerticalAlignment="Top" Width="630"/>
-            <TextBox Width="200" PlaceholderText="Search" HorizontalAlignment="Center"/>
+            <TextBox Name="TextSearch"  Width="200" PlaceholderText="Search" HorizontalAlignment="Center"/>
             <Button Background="#FF008299" Height="37" Width="41" Click="Search" HorizontalAlignment="Center">
                 <Image Source="Assets/search-icon.png"/>
             </Button>
