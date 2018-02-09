@@ -17,6 +17,7 @@
                         <TextBlock HorizontalAlignment="Center" Text="{Binding Title}"></TextBlock>
                         <TextBlock Name="Type" HorizontalAlignment="Center" Text="{Binding Type}" Visibility="Collapsed"></TextBlock>
                         <TextBlock Name="Size"  HorizontalAlignment="Center" Text="{Binding Size}" Visibility="Collapsed"></TextBlock>
+                        <TextBlock Name="Id"  HorizontalAlignment="Center" Text="{Binding Id}" Visibility="Collapsed"></TextBlock>
                     </StackPanel>
                 </DataTemplate>
             </GridView.ItemTemplate>
@@ -41,6 +42,8 @@
                     </MenuFlyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
+            <AppBarButton Icon="Favorite" Label="Display Fav" Click="DisplayFav" Foreground="White"/>
+            <AppBarToggleButton Name="StateApp" Icon="Switch" Label="Imgur" Foreground="White" Click="ToogleChange"/>
             <CommandBar.Content>
                 <TextBlock Text="Actions" Margin="12,14"/>
             </CommandBar.Content>

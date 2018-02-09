@@ -1,18 +1,19 @@
 ﻿using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Imgur.API.Authentication.Impl;
-using Imgur.API.Endpoints.Impl;
-using Imgur.API.Models;
-using System.IO;
-using System.Threading.Tasks;
-using Imgur.API;
-using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace epitecture
 {
     public sealed partial class MainPage : Page
     {
+        public void ToogleChange(object sender, RoutedEventArgs e)
+        {
+            if (StateApp.Label == "Imgur")
+                StateApp.Label = "Flickr";
+            else
+                StateApp.Label = "Imgur";
+        }
         public async void AddImage(object sender, RoutedEventArgs e)
         {
             var picker = new Windows.Storage.Pickers.FileOpenPicker();
@@ -28,7 +29,22 @@ namespace epitecture
 
             Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
             if (file != null)
-                await imgurFct.UploadImage(file);
+            {
+                var result = imgurFct.UploadImage(file);
+                ImageList.Items.Clear();
+                foreach (var element in result)
+                {
+                    var image = await imgurFct.LoadImage(element);
+                    ImageList.Items.Add(
+                        new ImageClass
+                        {
+                            ImageSource = image.Link,
+                            Title = image.Title,
+                            Type = image.Type,
+                            Size = image.Size
+                        });
+                }
+            }
         }
         public async void Search(object sender, RoutedEventArgs e)
         {
@@ -43,9 +59,9 @@ namespace epitecture
                     {
                         ImageSource = image.Link,
                         Title = image.Title,
-                        IsFav = (bool)image.Favorite,
                         Type = image.Type,
-                        Size = image.Size
+                        Size = image.Size,
+                        Id = image.Id
                     });
             }
         }
@@ -53,50 +69,91 @@ namespace epitecture
         public async void LoadImage(object sender, RoutedEventArgs e)
         {
             ImageList.Items.Clear();
-            var imageList = await imgurFct.Search("");
-            foreach (var element in imageList)
+            if (TopList.Count == 0)
             {
-                var image = await imgurFct.LoadImage(element);
-                ImageList.Items.Add(
-                    new ImageClass
+                var imageList = await imgurFct.Search("");
+                foreach (var element in imageList)
+                {
+                    var image = await imgurFct.LoadImage(element);
+                    ImageClass tmp = new ImageClass
                     {
                         ImageSource = image.Link,
                         Title = image.Title,
-                        IsFav = (bool)image.Favorite,
                         Type = image.Type,
-                        Size = image.Size
-                    });
+                        Size = image.Size,
+                        Id = image.Id
+                    };
+                    TopList.Add(tmp);
+                    ImageList.Items.Add(tmp);
+                }
             }
+            else
+                foreach (var element in TopList)
+                    ImageList.Items.Add(element);
         }
-
         public void SortByType(object sender, RoutedEventArgs e)
         {
-            //To sort : ImageList
-            //Type In GridView TexBlock Name = Type
-            //imgurFct.SortByType();
+            TopList.Sort(delegate (ImageClass x, ImageClass y)
+            {
+                if (x.Type == "image/png") return 0;
+                else if (y.Type == "image/png") return 1;
+                else if (x.Type == "image/jpeg" && y.Type == "image/gif") return 0;
+                else if (y.Type == "image/jpeg" && x.Type == "image/gif") return 1;
+                else return 1;
+            });
+            LoadImage(new object(), new RoutedEventArgs());
         }
 
         public void SortBySize(object sender, RoutedEventArgs e)
         {
-            //To sort : ImageList
-            //Size In GridView TexBlock Name = Size
-            //imgurFct.SortBySize();
+            TopList.Sort(delegate (ImageClass x, ImageClass y)
+            {
+                if (x.Size < y.Size) return 0;
+                else return 1;
+            });
+            LoadImage(new object(), new RoutedEventArgs());
         }
 
         public void FavOrUnfav(object sender, ItemClickEventArgs e)
         {
-            imgurFct.FavOrUnfav();
+            if (FavList.Contains((ImageClass)e.ClickedItem))
+                FavList.Remove((ImageClass)e.ClickedItem);
+            else
+                FavList.Add((ImageClass)e.ClickedItem);
         }
-
+        public void DisplayFav(object sender, RoutedEventArgs e)
+        {
+            if (FavDisplay == false)
+            {
+                ImageList.Items.Clear();
+                if (FavList.Count != 0)
+                {
+                    foreach (var element in FavList)
+                        ImageList.Items.Add(element);
+                }
+                FavDisplay = true;
+            }
+            else
+            {
+                LoadImage(new object(), new RoutedEventArgs());
+                FavDisplay = false;
+            }
+        }
         public MainPage()
         {
             imgurFct = new ImgurFct();
+            FavList = new List<ImageClass>();
+            TopList = new List<ImageClass>();
+            FavDisplay = false;
             this.InitializeComponent();
             prevSearch = "";
             LoadImage(new object(), new RoutedEventArgs());
         }
 
-        private ImgurFct imgurFct;
-        private string prevSearch;
+        private ImgurFct            imgurFct;
+        private string              prevSearch;
+        private List<ImageClass>    FavList;
+        private List<ImageClass>    TopList;
+        private bool                FavDisplay;
     }
 }
